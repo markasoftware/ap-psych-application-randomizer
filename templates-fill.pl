@@ -11,6 +11,7 @@ use File::Basename;
 sub lines_read {
     open(my $fh, '<', dirname(__FILE__) . '/' . shift) or die "Couldn't open file for reading: $!"; # $! == errno
     my @lines = <$fh>;
+    chomp @lines;
     close $fh or die "Couldn't close file from reading: $!";
     \@lines;
 }
@@ -86,9 +87,9 @@ sub choose_template {
 sub application_suite {
     my $essay_fst = int rand 2;
     my ($name1, $name2) = (pick_rand(@names), pick_rand(@names));
-    print application_template($name1, pick_rand(@descriptions), $essay_fst ? pick_rand(@essays) : undef);
-    print application_template($name2, pick_rand(@descriptions), $essay_fst ? undef : pick_rand(@essays));
-    print choose_template($name1, $name2);
+    say application_template($name1, pick_rand(@descriptions), $essay_fst ? pick_rand(@essays) : undef);
+    say application_template($name2, pick_rand(@descriptions), $essay_fst ? undef : pick_rand(@essays));
+    say choose_template($name1, $name2);
 }
 
 die 'Pass one command line argument (how many applications to generate).' unless @ARGV > 0;
