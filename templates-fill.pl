@@ -62,16 +62,18 @@ sub fill_template {
 
 # @param name
 # @param description
+# @param student ID
 # @param essay, or undef
 # @return filled out template
 sub application_template {
-    my ($name, $description, $essay) = @_;
+    my ($name, $description, $sid, $essay) = @_;
     my $essay_template = defined $essay ? $essay_template : '';
 
     fill_template($application_template,
                   __ESSAY_TEMPLATE => $essay_template,
                   __ESSAY_QUESTION => $essay,
                   __NAME => $name,
+                  __ID => $sid,
                   __DESCRIPTION => $description);
 }
 
@@ -86,9 +88,10 @@ sub choose_template {
 
 sub application_suite {
     my $essay_fst = int rand 2;
+    my $sid = 1e7 + int rand 9e7;
     my ($name1, $name2) = (pick_rand(@names), pick_rand(@names));
-    say application_template($name1, pick_rand(@descriptions), $essay_fst ? pick_rand(@essays) : undef);
-    say application_template($name2, pick_rand(@descriptions), $essay_fst ? undef : pick_rand(@essays));
+    say application_template($name1, pick_rand(@descriptions), $sid, $essay_fst ? pick_rand(@essays) : undef);
+    say application_template($name2, pick_rand(@descriptions), $sid, $essay_fst ? undef : pick_rand(@essays));
     say choose_template($name1, $name2);
 }
 
