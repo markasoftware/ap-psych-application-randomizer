@@ -72,7 +72,7 @@ sub fill_template {
 # @return filled out template
 sub application_template {
     my ($name, $sid, $essay_should) = @_;
-    my $essay_template = $essay_should && $essay_template;
+    my $essay_template = $essay_should ? $essay_template : '';
     my %template_params = ();
     for ("essay_question", "name", "description", "list_instruction", "fillin_instruction") {
         $lines_generics{$_} //= lines_read($_ . 's');
