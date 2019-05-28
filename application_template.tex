@@ -1,18 +1,20 @@
 \begin{center}
-  {\LARGE __NAME Application}
+  {\LARGE __NAME Application} \\
   Student ID: __ID
 \end{center}
 __DESCRIPTION
 \begin{questions}
   \question I am in grade \fillin.
   \question My cumulative GPA through my last completed semester is \fillin.
-  \question Please list all classes you are taking this semester and your grades in those classes. \\
+  \question __LIST_INSTRUCTION \\
   \begin{tabularx}{.9\textwidth}{X|X|r}
     Class & Teacher & Grade \\ \hline
-    \parbox[][2in]{0pt}{hi} & & \\
+    \parbox[][1.25in]{0pt}{hi} & & \\
   \end{tabularx}
   __ESSAY_TEMPLATE
   
-  \thispagestyle{empty} % suppress page number
 \end{questions}
-\pagebreak
+\begin{center}
+  \hdashrule[0pt][c]{.9\textwidth}{.5mm}{5pt 2pt 3pt 2pt}
+\end{center}
+%\bigskip

@@ -9,7 +9,8 @@ use File::Basename;
 # @param filename
 # @return array reference
 sub lines_read {
-    open(my $fh, '<', dirname(__FILE__) . '/' . shift) or die "Couldn't open file for reading: $!"; # $! == errno
+    my $fname = shift;
+    open(my $fh, '<', dirname(__FILE__) . '/' . $fname) or die "Couldn't open file $fname for reading: $!"; # $! == errno
     my @lines = <$fh>;
     chomp @lines;
     close $fh or die "Couldn't close file from reading: $!";
@@ -32,18 +33,22 @@ my $essay_template = whole_read 'essay_template.tex';
 my $choose_template = whole_read 'choose_template.tex';
 my $tex_footer = whole_read 'footer.tex';
 
-my @names = @{lines_read 'names'};
-my @descriptions = @{lines_read 'descriptions'};
-my @essays = @{lines_read 'essays'};
+my %lines_generics = (names => lines_read "names");
+my @names = @{$lines_generics{"names"}};
 
+# @param the key to prevent double picks by
 # @params a list
 # @return randomly selected from the list. Will never return the same element twice in a row!
-my $last_pick = -1;
+my %last_picks = ();
 sub pick_rand {
-    my $first_pick = int rand scalar @_;
-    return pick_rand(@_) if $first_pick == $last_pick;
-    $last_pick = $first_pick;
-    $_[$first_pick];
+    my $pick_key = shift;
+    $last_picks{$pick_key} //= -1;
+    my $last_pick_ref = \$last_picks{$pick_key};
+    my $last_pick = ${$last_pick_ref};
+    my $pick = $last_pick;
+    $pick = int rand scalar @_ while $pick == $last_pick;
+    ${$last_pick_ref} = $pick;
+    $_[$pick];
 }
 
 # @param $template
@@ -54,7 +59,7 @@ sub fill_template {
     my %replacements = @_;
     my $i = 0;
     while ($template =~ /__[A-Z]/) {
-        die 'Infinite template detected!' if $i++ > 100;
+        die "Infinite template detected! $template" if $i++ > 100;
         $template =~ s/$_/$replacements{$_}/g for keys %replacements;
     }
     $template;
@@ -66,15 +71,18 @@ sub fill_template {
 # @param essay, or undef
 # @return filled out template
 sub application_template {
-    my ($name, $description, $sid, $essay) = @_;
-    my $essay_template = defined $essay ? $essay_template : '';
+    my ($name, $sid, $essay_should) = @_;
+    my $essay_template = $essay_should && $essay_template;
+    my %template_params = ();
+    for ("essay_question", "name", "description", "list_instruction") {
+        $lines_generics{$_} //= lines_read($_ . 's');
+        $template_params{'__' . uc} = pick_rand($_, @{${lines_generics{$_}}});
+    }
 
     fill_template($application_template,
                   __ESSAY_TEMPLATE => $essay_template,
-                  __ESSAY_QUESTION => $essay,
-                  __NAME => $name,
                   __ID => $sid,
-                  __DESCRIPTION => $description);
+                  %template_params);
 }
 
 # @param name1
@@ -89,9 +97,9 @@ sub choose_template {
 sub application_suite {
     my $essay_fst = int rand 2;
     my $sid = 1e7 + int rand 9e7;
-    my ($name1, $name2) = (pick_rand(@names), pick_rand(@names));
-    say application_template($name1, pick_rand(@descriptions), $sid, $essay_fst ? pick_rand(@essays) : undef);
-    say application_template($name2, pick_rand(@descriptions), $sid, $essay_fst ? undef : pick_rand(@essays));
+    my ($name1, $name2) = (pick_rand("name", @names), pick_rand("name", @names));
+    say application_template($name1, $sid, $essay_fst);
+    say application_template($name2, $sid, not $essay_fst);
     say choose_template($name1, $name2);
 }
 
