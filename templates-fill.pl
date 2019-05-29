@@ -36,6 +36,8 @@ my $tex_footer = whole_read 'footer.tex';
 my %lines_generics = ();
 my @names = @{lines_read "names"};
 
+my @auto_template_keys = ("essay_question", "description", "list_instruction", "fillin_instruction");
+
 # @param the key to prevent double picks by
 # @params a list
 # @return randomly selected from the list. Will never return the same element twice in a row!
@@ -49,6 +51,13 @@ sub pick_rand {
     $pick = int rand scalar @_ while $pick == $last_pick;
     ${$last_pick_ref} = $pick;
     $_[$pick];
+}
+
+# destroy the uniqueness property of pick_rand. Call in-between applications
+# @param the key to zap
+sub zap_rand {
+    # shift doesn't work here for some reason
+    $last_picks{$_[0]} = -1;
 }
 
 # @param $template
@@ -74,7 +83,7 @@ sub application_template {
     my ($name, $sid, $essay_should) = @_;
     my $essay_template = $essay_should ? $essay_template : '';
     my %template_params = ();
-    for ("essay_question", "description", "list_instruction", "fillin_instruction") {
+    for (@auto_template_keys) {
         $lines_generics{$_} //= lines_read($_ . 's');
         $template_params{'__' . uc} = pick_rand($_, @{${lines_generics{$_}}});
     }
@@ -102,6 +111,7 @@ sub application_suite {
     say application_template($name1, $sid, $essay_fst);
     say application_template($name2, $sid, not $essay_fst);
     say choose_template($name1, $name2);
+    zap_rand $_ for @auto_template_keys, "description";
 }
 
 die 'Pass one command line argument (how many applications to generate).' unless @ARGV > 0;
