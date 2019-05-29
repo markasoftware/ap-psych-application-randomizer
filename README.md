@@ -6,4 +6,4 @@ This repository contains the code to generate randomized applications. By random
 
 ## Usage
 
-`./templates-fill.pl 100 | pdftex`: Generates `texput.pdf`, which contains all of the applications. **Important:** You'll probably need to install the `exam` TeX package, which is not included in most default installations (but is available on TeXLive).
+`./templates-fill.pl 100 | pdftex`: Generates `texput.pdf`, which contains all of the applications. **Important:** You'll probably need to install the `exam` and `dashrule` TeX packages, which are not included in most default installations (but are available on TeXLive).

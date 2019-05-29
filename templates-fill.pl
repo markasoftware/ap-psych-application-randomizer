@@ -33,8 +33,8 @@ my $essay_template = whole_read 'essay_template.tex';
 my $choose_template = whole_read 'choose_template.tex';
 my $tex_footer = whole_read 'footer.tex';
 
-my %lines_generics = (names => lines_read "names");
-my @names = @{$lines_generics{"names"}};
+my %lines_generics = ();
+my @names = @{lines_read "names"};
 
 # @param the key to prevent double picks by
 # @params a list
@@ -74,7 +74,7 @@ sub application_template {
     my ($name, $sid, $essay_should) = @_;
     my $essay_template = $essay_should ? $essay_template : '';
     my %template_params = ();
-    for ("essay_question", "name", "description", "list_instruction", "fillin_instruction") {
+    for ("essay_question", "description", "list_instruction", "fillin_instruction") {
         $lines_generics{$_} //= lines_read($_ . 's');
         $template_params{'__' . uc} = pick_rand($_, @{${lines_generics{$_}}});
     }
@@ -82,6 +82,7 @@ sub application_template {
     fill_template($application_template,
                   __ESSAY_TEMPLATE => $essay_template,
                   __ID => $sid,
+                  __NAME => $name,
                   %template_params);
 }
 
